@@ -1235,7 +1235,12 @@
             // Ancora na FOTO em si (visivel e dentro da viewport). Os containers
             // slick se movem/duplicam, por isso mirar neles jogava o selo pra fora.
             var best = null, area = 0;
-            var imgs = document.querySelectorAll('img');
+            // Tray/Day One: procura SÓ dentro da galeria do produto. Sem isso a
+            // varredura global pegava a maior imagem da página (banner/relacionado)
+            // e jogava o selo pra fora da foto. Ver validação na loja em 31/07.
+            var escopo = document.querySelector('.product-gallery, .product-images');
+            var imgs = (escopo || document).querySelectorAll('img');
+            if (escopo && !imgs.length) imgs = document.querySelectorAll('img');
             for (var i = 0; i < imgs.length; i++) {
                 var im = imgs[i], r = im.getBoundingClientRect();
                 var sc = im.getAttribute('src') || '';

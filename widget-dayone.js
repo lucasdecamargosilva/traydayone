@@ -1254,10 +1254,22 @@
             return best;
         }
         function plPosicionaSelo() {
-            var g = plGaleria();
-            if (!g) return false;
+            // Tray/Day One: a galeria é um swiper cujos slides ficam lado a lado muito
+            // além do container (overflow hidden) e uma das <img> renderiza no tamanho
+            // natural (1080x1920). Mirar na "maior imagem" jogava o selo pra fora da
+            // foto, então quando existe o container da galeria usamos o rect DELE.
+            var cont = document.querySelector('.product-gallery, .product-images');
+            var r;
+            if (cont) {
+                var cr = cont.getBoundingClientRect();
+                if (cr.width > 120 && cr.height > 120) r = cr;
+            }
+            if (!r) {
+                var g = plGaleria();
+                if (!g) return false;
+                r = g.getBoundingClientRect();
+            }
             if (!openBtn.isConnected) document.body.appendChild(openBtn);
-            var r = g.getBoundingClientRect();
             var mob = window.innerWidth < 768;
             var tam = mob ? 66 : 72;
             openBtn.style.position = 'fixed';

@@ -1061,7 +1061,7 @@
         // Tracking: registra o clique em "Comprar Agora" (marca carrinho_adicionado na prova)
         try {
             var _tp = (document.getElementById('q-phone') || {}).value || '';
-            var _td = (document.querySelector('.product-name,h1.product-name,h1') || {}).innerText || document.title || '';
+            var _td = plNomeProduto();
             fetch('https://n8n.segredosdodrop.com/webhook/pl-provador-buy-click', { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: _tp, origin: location.origin, produto: _td }) }).catch(function () {});
         } catch (e) {}
         var src = getProductForm();
@@ -1165,7 +1165,7 @@
         if (!btn) return;
         // Nome + valor do produto acima do botão
         var price = getMainPrice();
-        var prodName = (document.querySelector('.product-name,h1.product-name,h1') || {}).innerText || document.title || '';
+        var prodName = plNomeProduto();
         var info = document.getElementById('q-result-prodinfo');
         var nameEl = document.getElementById('q-result-prodname');
         var priceEl = document.getElementById('q-result-prodprice');
@@ -1190,7 +1190,7 @@
 
     function init() {
         // --- FILTRO DE CATEGORIA (HAT) ---
-        const productNameNormalized = (document.querySelector('.product-name, h1.product-name, h1')?.innerText || document.title).toUpperCase();
+        const productNameNormalized = (plNomeProduto()).toUpperCase();
         if (productNameNormalized.includes('HAT')) {
             return;
         }
@@ -1327,7 +1327,7 @@
                     openBtn.style.cssText = 'position:fixed;bottom:30px;right:20px;top:auto;z-index:100;';
                     document.body.appendChild(openBtn);
                 }
-            }, 5000);
+            }, 12000);
         }
 
 
@@ -1361,7 +1361,7 @@
         inlineBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            const prodName = document.querySelector('.product-name, h1.product-name, h1')?.innerText || document.title;
+            const prodName = plNomeProduto();
             applyProduct(detectProduct(prodName));
             populateImageSelector();
             openModal();
@@ -1526,7 +1526,7 @@
         // -- Tracking de abertura do provador (session anonima) - Provou Levou --
         var WEBHOOK_OPEN_PL = 'https://n8n.segredosdodrop.com/webhook/pl-provador-open';
         function plSid() { try { var s = localStorage.getItem('pl_sid'); if (!s) { s = 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10); localStorage.setItem('pl_sid', s); } return s; } catch (e) { return 'nostore'; } }
-        function plTrackOpen() { try { fetch(WEBHOOK_OPEN_PL, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session_id: plSid(), origin: location.origin, produto: (document.querySelector('h1.product-name, h1.product__title, .product-single__title, h1') || {}).innerText || document.title || '' }) }).catch(function () {}); } catch (e) {} }
+        function plTrackOpen() { try { fetch(WEBHOOK_OPEN_PL, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session_id: plSid(), origin: location.origin, produto: plNomeProduto() }) }).catch(function () {}); } catch (e) {} }
         function plTrackProved(rawPhone) { try { var d = (rawPhone || '').replace(/\D/g, ''); if (d.length > 11 && d.slice(0, 2) === '55') d = d.slice(2); fetch(WEBHOOK_OPEN_PL, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session_id: plSid(), proved: true, telefone_cliente: d || null }) }).catch(function () {}); } catch (e) {} }
         // ── Detecção de rosto: foto do óculos no rosto vira a referência principal ──
         // Roda no navegador (FaceDetector nativo do Chromium; fallback MediaPipe via CDN).
@@ -1711,7 +1711,7 @@
                 e.preventDefault();
                 e.stopPropagation();
             }
-            const prodName = document.querySelector('.product-name, h1.product-name, h1')?.innerText || document.title;
+            const prodName = plNomeProduto();
             applyProduct(detectProduct(prodName));
             populateImageSelector();
             openModal();
@@ -2172,7 +2172,7 @@
                 }
 
                 const prodImg = (userPickedPhoto && selectedProductImgUrl) || plVariantImage() || selectedProductImgUrl || (document.querySelector('meta[property="og:image"]')?.content || '');
-                const prodName = document.querySelector('.product-name, h1.product-name, h1')?.innerText || document.title;
+                const prodName = plNomeProduto();
 
                 uploadStep.style.display = 'none';
                 document.getElementById('q-loading-box').style.display = 'flex';
@@ -2382,12 +2382,45 @@ const fd = new FormData();
     // o init() abaixo nunca rodaria (era preciso dar F5). Observamos a troca de
     // rota e montamos o provador assim que virar pagina de produto.
     var _plMontado = false;
+
+    // ── Nome do produto (Tray/Day One) ────────────────────────────────────────
+    // ⚠️ NÃO usar .product-name: nesse tema ela casa com os CARDS dos carrosséis
+    // (produtos relacionados), então pegaria o produto errado. As fontes
+    // confiáveis são o JSON-LD e o og:title da própria página.
+    function plNomeProduto() {
+        try {
+            var lds = document.querySelectorAll('script[type="application/ld+json"]');
+            for (var i = 0; i < lds.length; i++) {
+                try {
+                    var j = JSON.parse(lds[i].textContent);
+                    var arr = Array.isArray(j) ? j : (j['@graph'] || [j]);
+                    for (var k = 0; k < arr.length; k++) {
+                        var it = arr[k];
+                        if (it && it.name && (!it['@type'] || /product/i.test(String(it['@type'])))) {
+                            return String(it.name).trim();
+                        }
+                    }
+                } catch (_) {}
+            }
+        } catch (_) {}
+        var og = (document.querySelector('meta[property="og:title"]') || {}).content || '';
+        var t = (og || document.title || '').trim();
+        return t.replace(/\s*[-–|]\s*Day One Store\s*$/i, '').trim();
+    }
+
     function plEhProduto() {
-        // Tray (tema Day One): a URL é /categoria/slug e og:type vem como "website",
-        // então detectamos pelo DOM da página de produto.
-        return !!document.querySelector('.product-name')
-            || !!document.querySelector('.botao-comprar, .page-product__button-buy')
-            || /\/p($|\/|\?)/.test(window.location.pathname + window.location.search)
+        // Tray (tema Day One): a URL é /categoria/slug e og:type vem como "website".
+        // ⚠️ NÃO usar .product-name / .product-gallery aqui: existem também nas páginas
+        // de CATEGORIA (cards dos carrosséis). O que só aparece na página de produto é
+        // o bloco de compra (.page-product__*) e o JSON-LD com @type Product.
+        if (document.querySelector('.page-product__button-buy, .page-product__quantity-and-buy, .botao-comprar')) return true;
+        try {
+            var lds = document.querySelectorAll('script[type="application/ld+json"]');
+            for (var i = 0; i < lds.length; i++) {
+                if (/"@type"\s*:\s*"Product"/i.test(lds[i].textContent || '')) return true;
+            }
+        } catch (_) {}
+        return /\/p($|\/|\?)/.test(window.location.pathname + window.location.search)
             || window.location.pathname.indexOf('/produtos/') > -1
             || !!document.querySelector('meta[property="og:type"][content="product"]');
     }

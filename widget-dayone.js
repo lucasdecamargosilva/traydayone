@@ -235,7 +235,7 @@
             display: flex; align-items: center; justify-content: center; gap: 9px;
             width: 100%; height: 39px; padding: 0 16px;
             background: transparent; color: #2C3E50;
-            border: 2px solid #2C3E50; border-radius: 50px;
+            border: 1px solid #2C3E50; border-radius: 50px;
             font-size: 17px; font-weight: 400; letter-spacing: normal; text-transform: none;
             cursor: pointer; transition: background 0.25s, color 0.25s;
             margin-bottom: 0; box-sizing: border-box;

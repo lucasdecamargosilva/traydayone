@@ -233,7 +233,7 @@
            secundario em relacao ao comprar. */
         .q-btn-inline-provador {
             display: flex; align-items: center; justify-content: center; gap: 9px;
-            width: 100%; height: 50px; padding: 0 16px;
+            width: 100%; height: 39px; padding: 0 16px;
             background: transparent; color: #2C3E50;
             border: 2px solid #2C3E50; border-radius: 50px;
             font-size: 17px; font-weight: 400; letter-spacing: normal; text-transform: uppercase;
@@ -1398,7 +1398,7 @@
         inlineBtn.style.alignItems = 'center';
         inlineBtn.style.justifyContent = 'center';
         inlineBtn.style.alignSelf = 'stretch';
-        inlineBtn.style.height = '50px';       // mesma altura do COMPRAR
+        inlineBtn.style.height = '39px';       // mesma altura do botao "Comprar pelo Whats"
         inlineBtn.style.borderRadius = '50px'; // mesmo pill do COMPRAR
         inlineBtn.style.margin = '12px 0 0';   // respiro logo abaixo do COMPRAR
         // O botao de compra pode ser montado DEPOIS do init(), entao

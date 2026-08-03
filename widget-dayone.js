@@ -236,7 +236,7 @@
             width: 100%; height: 50px; padding: 0 16px;
             background: transparent; color: #2C3E50;
             border: 2px solid #2C3E50; border-radius: 50px;
-            font-size: 17px; font-weight: 700; letter-spacing: normal; text-transform: uppercase;
+            font-size: 17px; font-weight: 400; letter-spacing: normal; text-transform: uppercase;
             cursor: pointer; transition: background 0.25s, color 0.25s;
             margin-bottom: 0; box-sizing: border-box;
         }
@@ -831,9 +831,11 @@
         }
         /* 'Work Sans' era resto do template de oculos: na maquina de quem tem a
            fonte instalada o botao renderizava numa familia diferente do site. */
+        /* sem negrito (pedido do lojista): o COMPRAR e 700, o provador fica 400
+           pra ficar visivelmente secundario. */
         .q-btn-inline-provador {
             font-family: inherit;
-            font-weight: 700; letter-spacing: normal; font-size: 17px;
+            font-weight: 400; letter-spacing: normal; font-size: 17px;
         }
     `;
 

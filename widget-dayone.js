@@ -1482,16 +1482,30 @@
 
         function extractImages() {
             const containersSelectors = '.product-gallery, .product-images, .image.swiper-slide, .js-product-slide, .product-image-column, .js-swiper-product, [data-store^="product-image-"], .product__media-wrapper, .product-gallery__media, .product__media, .product-image-main, .product-media-container, [data-media-id], .product__media-item, .product-gallery, .product-single__media, .media-gallery, [data-component="product.gallery"], .swiper-slide:not(.swiper-slide-duplicate), .slider-wrapper';
-            const possibleContainers = Array.from(document.querySelectorAll(containersSelectors));
+            // ⚠️ Tema Tray 127: os carrosseis de produtos RELACIONADOS tambem sao
+            // .swiper-slide e vem ANTES da galeria no DOM. Hoje escapam so porque
+            // estao com placeholder 1x1; assim que o lazy-load troca o src -- ou
+            // ANTES de carregarem, quando naturalWidth e 0 e o filtro de tamanho
+            // nao pega -- eles entram e ocupam os 4 slots, e a prova sai com a peca
+            // errada. Quando a galeria do produto existe, so ela vale.
+            const _galeriaProduto = document.querySelector('.product-images') || document.querySelector('.product-gallery');
+            let possibleContainers = _galeriaProduto ? [_galeriaProduto] : Array.from(document.querySelectorAll(containersSelectors));
             let imgEls = [];
-            possibleContainers.forEach(c => {
-                if (!c.closest('#q-modal-ia')) {
-                    const foundImgs = c.querySelectorAll('img');
-                    imgEls.push(...Array.from(foundImgs));
-                }
-            });
+            const _coleta = (conts) => {
+                const out = [];
+                conts.forEach(c => {
+                    if (!c.closest('#q-modal-ia')) out.push(...Array.from(c.querySelectorAll('img')));
+                });
+                return out;
+            };
+            imgEls = _coleta(possibleContainers);
+            // galeria existe mas ainda sem <img> (render tardio) -> volta pro seletor amplo
+            if (!imgEls.length && _galeriaProduto) imgEls = _coleta(Array.from(document.querySelectorAll(containersSelectors)));
             let uniqueImgs = [];
             imgEls.forEach(img => {
+                // miniaturas da galeria (pai .thumb, arquivo prefixado "90_") nao servem
+                // de referencia: sao a mesma foto em baixa resolucao.
+                if (img.closest('.thumb')) return;
                 let src = img.dataset?.src || img.getAttribute('data-src') || img.src;
 
                 if (src && src.includes('data:image')) {
@@ -1513,12 +1527,15 @@
                 if (img.naturalWidth > 0 && img.naturalWidth < 50) return;
                 if (img.naturalHeight > 0 && img.naturalHeight < 50) return;
 
-                let cleanSrc = src.split('?')[0].replace(/-\d+-\d+\.webp|_\d+x\d+/, '');
+                // A Tray serve a miniatura como "<tamanho>_<arquivo>" (ex.: 90_colete...jpg).
+                // Sem normalizar isso a mesma foto entrava duas vezes e ocupava 2 dos 4 slots.
+                const _norm = u => u.split('?')[0].replace(/-\d+-\d+\.webp|_\d+x\d+/, '').replace(/\/\d+_(?=[^/]+$)/, '/');
+                let cleanSrc = _norm(src);
 
                 // Upgrade to 1024px version
                 src = upgradeImgUrl(src);
 
-                if (!uniqueImgs.some(u => u.split('?')[0].replace(/-\d+-\d+\.webp|_\d+x\d+/, '') === cleanSrc)) {
+                if (!uniqueImgs.some(u => _norm(u) === cleanSrc)) {
                     uniqueImgs.push(src);
                 }
             });

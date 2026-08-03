@@ -228,17 +228,20 @@
         @media (min-width: 768px) { .q-btn-trigger-ia { width: 70px; height: 70px; } }
 
         /* ── Inline button ── */
+        /* Espelha o botao COMPRAR do tema (button#button-buy): pill 50px, Lato 17/700
+           uppercase, altura 50px, #2C3E50 — mas SEM fundo (outline), pra ficar
+           secundario em relacao ao comprar. */
         .q-btn-inline-provador {
-            display: flex; align-items: center; justify-content: center; gap: 7px;
-            width: 100%; padding: 13px 16px;
-            background: transparent; color: var(--c-ink);
-            border: 1.5px solid var(--c-ink); border-radius: 10px;
-            font-family: 'Work Sans', var(--font-body), sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+            display: flex; align-items: center; justify-content: center; gap: 9px;
+            width: 100%; height: 50px; padding: 0 16px;
+            background: transparent; color: #2C3E50;
+            border: 2px solid #2C3E50; border-radius: 50px;
+            font-size: 17px; font-weight: 700; letter-spacing: normal; text-transform: uppercase;
             cursor: pointer; transition: background 0.25s, color 0.25s;
-            margin-bottom: 10px; box-sizing: border-box;
+            margin-bottom: 0; box-sizing: border-box;
         }
-        .q-btn-inline-provador:hover { background: var(--c-ink); color: #fff; }
-        .q-btn-inline-provador svg { width: 14px; height: 14px; flex-shrink: 0; }
+        .q-btn-inline-provador:hover { background: #2C3E50; color: #fff; }
+        .q-btn-inline-provador svg { width: 18px; height: 18px; flex-shrink: 0; }
 
         /* ── Modal overlay ── */
         @keyframes q-modal-in { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
@@ -830,7 +833,7 @@
            fonte instalada o botao renderizava numa familia diferente do site. */
         .q-btn-inline-provador {
             font-family: inherit;
-            font-weight: 700; letter-spacing: .4px; font-size: 12.8px;
+            font-weight: 700; letter-spacing: normal; font-size: 17px;
         }
     `;
 
@@ -1384,7 +1387,7 @@
             openModal();
         });
 
-        // Posiciona acima do botão de compra
+        // Posiciona ABAIXO do botão de compra (pedido do lojista)
         // Tray: o botao de compra e o .botao-comprar da pagina de produto
         // O bloco de compra usa flex: sem width:100% o botao encolhe e cola a esquerda
         inlineBtn.style.width = '100%';
@@ -1393,10 +1396,9 @@
         inlineBtn.style.alignItems = 'center';
         inlineBtn.style.justifyContent = 'center';
         inlineBtn.style.alignSelf = 'stretch';
-        inlineBtn.style.borderRadius = '0';   // borda quadrada (pedido do lojista)
-        // Desktop: colado no COMPRAR. Mobile: precisa de respiro embaixo tambem,
-        // senao os dois botoes ficam grudados.
-        inlineBtn.style.margin = '20px 0 0';   // mesmo espacamento no mobile e no desktop
+        inlineBtn.style.height = '50px';       // mesma altura do COMPRAR
+        inlineBtn.style.borderRadius = '50px'; // mesmo pill do COMPRAR
+        inlineBtn.style.margin = '12px 0 0';   // respiro logo abaixo do COMPRAR
         // O botao de compra pode ser montado DEPOIS do init(), entao
         // a insercao unica falhava no primeiro acesso (so aparecia apos F5).
         // Agora tentamos ate o alvo existir.
@@ -1412,19 +1414,12 @@
                     if ((_d === 'flex' || _d === 'inline-flex') && _dir.indexOf('row') === 0) { _row = _row.parentElement; }
                     else { break; }
                 }
+                // ABAIXO do bloco de compra. insertBefore(el, _row.nextSibling) com
+                // nextSibling null vira append — cobre o caso de _row ser o ultimo filho.
                 if (_row && _row.parentElement) {
-                    _row.parentElement.insertBefore(inlineBtn, _row);
-                    try {
-                        _row.style.marginTop = (window.innerWidth < 768) ? '6px' : '0'; _row.style.paddingTop = '0';
-                        var _p = buyBtn;
-                        for (var _k = 0; _k < 5 && _p && _p !== inlineBtn.parentElement; _k++) {
-                            var _mt = parseFloat(window.getComputedStyle(_p).marginTop) || 0;
-                            if (_mt > 6) { _p.style.marginTop = '6px'; }
-                            _p = _p.parentElement;
-                        }
-                    } catch (e) {}
+                    _row.parentElement.insertBefore(inlineBtn, _row.nextSibling);
                 } else {
-                    buyBtn.parentNode.insertBefore(inlineBtn, buyBtn);
+                    buyBtn.parentNode.insertBefore(inlineBtn, buyBtn.nextSibling);
                 }
                 return true;
             } catch (e) { return false; }

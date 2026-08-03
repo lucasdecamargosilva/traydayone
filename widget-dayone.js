@@ -236,7 +236,7 @@
             width: 100%; height: 39px; padding: 0 16px;
             background: transparent; color: #2C3E50;
             border: 2px solid #2C3E50; border-radius: 50px;
-            font-size: 17px; font-weight: 400; letter-spacing: normal; text-transform: uppercase;
+            font-size: 17px; font-weight: 400; letter-spacing: normal; text-transform: none;
             cursor: pointer; transition: background 0.25s, color 0.25s;
             margin-bottom: 0; box-sizing: border-box;
         }
@@ -1377,7 +1377,7 @@
         inlineSvg.appendChild(circle1);
         inlineBtn.appendChild(inlineSvg);
 
-        const inlineBtnText = document.createTextNode('Provador Virtual');
+        const inlineBtnText = document.createTextNode('Provador virtual');
         inlineBtn.appendChild(inlineBtnText);
 
         inlineBtn.addEventListener('click', (e) => {

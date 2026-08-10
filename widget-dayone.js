@@ -1,5 +1,13 @@
 (function () {
 
+    // ─── PROVADOR DESLIGADO (10/08/2026) ──────────────────────────────────────
+    // Kill switch a pedido do Lucas: o widget nao monta e nenhum botao aparece.
+    // O backend (check-limit, gerador, sync de pedidos) segue intacto.
+    // Para religar: apague estas 3 linhas ate o `return;` inclusive.
+    var PL_PROVADOR_OFF = true;
+    if (PL_PROVADOR_OFF) return;
+
+
     // ─── FORA DO PROVADOR: calcados e bolsas (a Luzzi vende roupa, calcado e bolsa) ───
     var PL_RE_BLOQ = /(bota|botina|coturno|sapatilha|sapato|scarpin|mocassim|mocassin|sand[aá]lia|sand|papete|rasteir\w*|flat|t[eê]nis|chinelo|tamanco|mule|slide|anabela|peep\s?toe|salto|bolsa|clutch|mochila|carteira|necess[aá]ire)/i;
 
